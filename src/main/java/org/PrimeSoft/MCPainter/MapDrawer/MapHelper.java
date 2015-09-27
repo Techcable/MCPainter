@@ -42,14 +42,14 @@ import org.bukkit.map.MapView;
  * @author SBPrime
  */
 public class MapHelper {
-    private final HashMap<Integer, List<MapRenderer>> m_mapList = new HashMap<Integer, List<MapRenderer>>();
+    private final HashMap<Long, List<MapRenderer>> m_mapList = new HashMap<Long, List<MapRenderer>>();
 
     /**
      * Delete image map
      * @param mapView map view to remove map
      */
     public void deleteMap(MapView mapView) {
-        short mapId = mapView.getId();
+        long mapId = mapView.getLongId();
         List<MapRenderer> renderers = mapView.getRenderers();
         File fileName = new File(ConfigProvider.getImgFolder(), mapId + ".png");
         if (fileName.exists()) {
@@ -60,16 +60,15 @@ public class MapHelper {
         }
 
         synchronized (m_mapList) {
-            Integer key = (int) mapId;
-            if (!m_mapList.containsKey(key)) {
+            if (!m_mapList.containsKey(mapId)) {
                 return;
             }
-            renderers = m_mapList.get(key);
+            renderers = m_mapList.get(mapId);
             for (MapRenderer mapRenderer : renderers) {
                 mapView.addRenderer(mapRenderer);
             }
 
-            m_mapList.remove(key);
+            m_mapList.remove(mapId);
         }
     }
 
@@ -80,14 +79,14 @@ public class MapHelper {
      */
     public void storeMap(MapView mapView, BufferedImage img) {
         List<MapRenderer> renderers = mapView.getRenderers();
-        short mapId = mapView.getId();
+        long mapId = mapView.getLongId();
 
         for (MapRenderer r : renderers) {
             mapView.removeRenderer(r);
         }
 
         synchronized (m_mapList) {
-            Integer key = (int) mapId;
+            Long key = mapId;
             if (!m_mapList.containsKey(key)) {
                 m_mapList.put(key, renderers);
             }
@@ -108,7 +107,6 @@ public class MapHelper {
         File mapDir = ConfigProvider.getImgFolder();
         File[] files = mapDir.listFiles(new FilenameFilter() {
 
-            @Override
             public boolean accept(File dir, String name) {
                 return name.toLowerCase().endsWith(".png");
             }
@@ -118,9 +116,9 @@ public class MapHelper {
         MCPainterMain.log("Restoring drawing maps...");
         for (File file : files) {
             String name = file.getName().split("\\.")[0];
-            short id;
+            long id;
             try {
-                id = (short) Integer.parseInt(name);
+                id = Long.parseLong(name);
             } catch (NumberFormatException ex) {
                 MCPainterMain.log("* Invalid file " + file.getName());
                 continue;
@@ -147,9 +145,8 @@ public class MapHelper {
             }
 
             synchronized (m_mapList) {
-                Integer key = new Integer(id);
-                if (!m_mapList.containsKey(key)) {
-                    m_mapList.put(key, renderers);
+                if (!m_mapList.containsKey(id)) {
+                    m_mapList.put(id, renderers);
                 }
             }
             drawImage(mapView, img);
