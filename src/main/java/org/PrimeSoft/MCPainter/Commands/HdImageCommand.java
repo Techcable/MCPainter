@@ -53,7 +53,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.map.MapView;
 
 /**
@@ -135,6 +134,7 @@ public class HdImageCommand {
             m_rotation = face;
         }
         
+        @Override
         public void execute(BlockPlacer blockPlacer, BlockLoger loger) {
             Chunk chunk = m_location.getChunk();
             if (!chunk.isLoaded()) {
@@ -160,11 +160,10 @@ public class HdImageCommand {
             m_mapView = Bukkit.createMap(w);
             m_mapHelper.storeMap(m_mapView, m_img);
             m_mapHelper.drawImage(m_mapView, m_img);
-            ItemStack stack = new ItemStack(Material.MAP, 1);
-            ((MapMeta) stack.getItemMeta()).setId(m_mapView.getLongId());
-            m_frame.setItem(stack);
+            m_frame.setItem(new ItemStack(Material.MAP, 1, m_mapView.getId()));
         }
 
+        @Override
         public Location getLocation() {
             return m_location;
         }
@@ -194,6 +193,7 @@ public class HdImageCommand {
             m_session = m_lSession.createEditSession(localPlayer);
         }
 
+        @Override
         public void run() {
             FilterManager fm = FilterManager.getFilterManager(m_player);
             double price = ConfigProvider.getCommandPrice("imagehd") + fm.getPrice();

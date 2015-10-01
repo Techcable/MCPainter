@@ -37,7 +37,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.map.MapView;
 
 /**
@@ -57,7 +56,7 @@ public class MapCommand {
             return;
         }
 
-        long mapId = -1;
+        short mapId = -1;
         String url = null;
         int offset;
 
@@ -82,10 +81,8 @@ public class MapCommand {
         MapView mapView = null;
         if (mapId == -1 && !reset) {
             mapView = Bukkit.createMap(player.getWorld());
-            mapId = mapView.getLongId();
-            ItemStack stack = new ItemStack(Material.MAP, 1);
-            ((MapMeta) stack.getItemMeta()).setId(mapId);
-            player.setItemInHand(stack);
+            mapId = mapView.getId();
+            player.setItemInHand(new ItemStack(Material.MAP, 1, mapId));
         }
         if (mapView == null) {
             try {
@@ -127,6 +124,7 @@ public class MapCommand {
             m_offset = offset;
         }
 
+        @Override
         public void run() {
             FilterManager fm = FilterManager.getFilterManager(m_player);
             double price = ConfigProvider.getCommandPrice("map") + fm.getPrice();
@@ -155,6 +153,7 @@ public class MapCommand {
 
                 m_sender.getServer().getScheduler().runTask(m_sender, new Runnable() {
 
+                    @Override
                     public void run() {
                         MCPainterMain.say(m_player, "Drawing image...");
 
